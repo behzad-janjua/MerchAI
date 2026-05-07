@@ -24,4 +24,10 @@ npm run prisma:migrate
 npm run dev:backend
 ```
 
-Copy `.env.example` to `.env` and replace the database or LLM values for your machine.
+In another terminal:
+
+```bash
+npm run dev:frontend
+```
+
+Copy `.env.example` to `.env` and replace the database, API, frontend, or LLM values for your machine.
