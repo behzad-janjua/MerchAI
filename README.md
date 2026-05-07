@@ -25,28 +25,58 @@ Portfolio MVP for a Shopify Product Listing Optimization Agent. MerchAI imports 
 ## Requirements
 
 - Node.js 20+
+- Yarn 1.22+
 - PostgreSQL
 - A local `.env` file copied from `.env.example`
 
 ## Setup
 
+Install dependencies:
+
 ```bash
-npm install
+yarn install
+```
+
+For a fresh local setup, copy the env file and run the setup script. This installs dependencies from `yarn.lock`, runs Prisma migrations, generates the Prisma client, and seeds demo data.
+
+```bash
 cp .env.example .env
-npm run prisma:migrate
-npm run prisma:generate
+yarn setup
 ```
 
-Start the backend:
+Seed demo data again when needed:
 
 ```bash
-npm run dev:backend
+yarn seed
 ```
 
-Start the frontend in another terminal:
+Start the full dev workspace:
 
 ```bash
-npm run dev:frontend
+yarn dev
+```
+
+Build and run the production-style local preview:
+
+```bash
+yarn start
+```
+
+Useful focused commands:
+
+```bash
+yarn build
+yarn test:backend
+yarn prisma:studio
+```
+
+`yarn seen` is also available as a typo-friendly alias for `yarn seed`.
+
+To run only one side of the app:
+
+```bash
+yarn dev:backend
+yarn dev:frontend
 ```
 
 Default URLs:
@@ -134,8 +164,7 @@ Import responses include `createdCount`, `updatedCount`, detected `format`, and 
 ## Verification
 
 ```bash
-npm run prisma:generate
-npm run build:backend
-npm run build:frontend
-npm run test:backend
+yarn prisma:generate
+yarn build
+yarn test:backend
 ```

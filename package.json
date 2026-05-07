@@ -2,19 +2,29 @@
   "name": "merchai",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "yarn@1.22.22",
   "workspaces": [
     "backend",
     "frontend"
   ],
   "scripts": {
-    "dev:backend": "npm run dev --workspace backend",
-    "dev:frontend": "npm run dev --workspace frontend",
-    "build:backend": "npm run build --workspace backend",
-    "build:frontend": "npm run build --workspace frontend",
-    "test:backend": "npm run test --workspace backend",
-    "prisma:generate": "prisma generate --schema backend/prisma/schema.prisma",
-    "prisma:migrate": "prisma migrate dev --schema backend/prisma/schema.prisma",
-    "prisma:studio": "prisma studio --schema backend/prisma/schema.prisma"
+    "setup": "yarn install --frozen-lockfile && yarn prisma:migrate && yarn prisma:generate && yarn seed",
+    "seed": "yarn prisma:seed",
+    "seen": "yarn seed",
+    "dev": "node scripts/run-services.mjs dev:backend dev:frontend",
+    "start": "yarn build && node scripts/run-services.mjs start:backend start:frontend",
+    "build": "yarn build:backend && yarn build:frontend",
+    "dev:backend": "yarn workspace @merchai/backend dev",
+    "dev:frontend": "yarn workspace @merchai/frontend dev",
+    "start:backend": "yarn workspace @merchai/backend start",
+    "start:frontend": "yarn workspace @merchai/frontend preview --host 0.0.0.0",
+    "build:backend": "yarn workspace @merchai/backend build",
+    "build:frontend": "yarn workspace @merchai/frontend build",
+    "test:backend": "yarn workspace @merchai/backend test",
+    "prisma:generate": "yarn workspace @merchai/backend prisma:generate",
+    "prisma:migrate": "yarn workspace @merchai/backend prisma:migrate",
+    "prisma:seed": "yarn workspace @merchai/backend prisma:seed",
+    "prisma:studio": "yarn workspace @merchai/backend prisma:studio"
   },
   "engines": {
     "node": ">=20"
