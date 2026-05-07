@@ -27,6 +27,7 @@ type PrismaProductListing = {
 
 type PrismaSuggestion = {
   id: string;
+  agentRunId: string;
   improvedTitle: string | null;
   improvedDescription: string;
   tags: string[];
@@ -68,6 +69,7 @@ export class ProductListingMapper {
   private toSuggestionSummary(record: PrismaSuggestion): OptimizationSuggestionSummary {
     return {
       id: record.id,
+      agentRunId: record.agentRunId,
       improvedTitle: record.improvedTitle,
       improvedDescription: record.improvedDescription,
       tags: record.tags,

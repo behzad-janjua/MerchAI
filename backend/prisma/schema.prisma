@@ -49,8 +49,52 @@ model AgentRun {
   updatedAt        DateTime                @updatedAt
   productListing   ProductListing          @relation(fields: [productListingId], references: [id], onDelete: Cascade)
   suggestion       OptimizationSuggestion?
+  steps            AgentStepRun[]
 
   @@index([productListingId, createdAt])
+}
+
+model AgentStepRun {
+  id            String         @id @default(cuid())
+  agentRunId    String
+  stepName      String
+  stepOrder     Int
+  prompt        String         @db.Text
+  response      String?        @db.Text
+  provider      String?
+  model         String?
+  inputTokens   Int?
+  outputTokens  Int?
+  estimatedCost Decimal?       @db.Decimal(10, 6)
+  status        AgentRunStatus @default(QUEUED)
+  errorMessage  String?
+  metadata      Json           @default("{}")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  agentRun      AgentRun       @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+
+  @@index([agentRunId, stepOrder])
+  @@index([provider, model])
+}
+
+model LlmProviderConfig {
+  id              String   @id @default(cuid())
+  key             String   @unique
+  provider        String
+  displayName     String
+  baseUrl         String?
+  apiKeyEnvVar    String?
+  model           String
+  inputCostPer1K  Decimal  @default(0) @db.Decimal(10, 6)
+  outputCostPer1K Decimal  @default(0) @db.Decimal(10, 6)
+  enabled         Boolean  @default(true)
+  isDefault       Boolean  @default(false)
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([enabled, isDefault])
+  @@index([provider, model])
 }
 
 model OptimizationSuggestion {

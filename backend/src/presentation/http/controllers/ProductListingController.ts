@@ -6,9 +6,11 @@ import {
 import { CreateProductListingService } from "../../../application/services/CreateProductListingService.js";
 import { DeleteProductListingService } from "../../../application/services/DeleteProductListingService.js";
 import { GetProductListingService } from "../../../application/services/GetProductListingService.js";
+import { ImportProductListingsCsvService } from "../../../application/services/ImportProductListingsCsvService.js";
 import { ListProductListingsService } from "../../../application/services/ListProductListingsService.js";
 import { OptimizeProductListingService } from "../../../application/services/OptimizeProductListingService.js";
 import { UpdateProductListingService } from "../../../application/services/UpdateProductListingService.js";
+import { MultipartCsvExtractor } from "../MultipartCsvExtractor.js";
 import { AgentRunSerializer } from "../serializers/AgentRunSerializer.js";
 import { ProductListingSerializer } from "../serializers/ProductListingSerializer.js";
 
@@ -20,6 +22,8 @@ export class ProductListingController {
     private readonly updateProductListing: UpdateProductListingService,
     private readonly deleteProductListing: DeleteProductListingService,
     private readonly optimizeProductListing: OptimizeProductListingService,
+    private readonly importProductListingsCsv: ImportProductListingsCsvService,
+    private readonly csvExtractor: MultipartCsvExtractor,
     private readonly productListingSerializer: ProductListingSerializer,
     private readonly agentRunSerializer: AgentRunSerializer
   ) {}
@@ -54,6 +58,12 @@ export class ProductListingController {
   optimize = async (request: Request, response: Response): Promise<void> => {
     const run = await this.optimizeProductListing.execute(this.paramId(request));
     response.status(201).json(this.agentRunSerializer.serialize(run));
+  };
+
+  importCsv = async (request: Request, response: Response): Promise<void> => {
+    const csv = this.csvExtractor.extract(request);
+    const result = await this.importProductListingsCsv.execute(csv);
+    response.status(201).json(result);
   };
 
   private paramId(request: Request): string {

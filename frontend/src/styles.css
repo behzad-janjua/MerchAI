@@ -115,6 +115,11 @@ h3 {
   width: 38px;
 }
 
+.iconButton.small {
+  min-height: 30px;
+  width: 30px;
+}
+
 button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
@@ -136,6 +141,11 @@ button:disabled {
   grid-template-columns: minmax(240px, 0.85fr) minmax(420px, 1.5fr) minmax(320px, 1fr);
   margin: 0 auto;
   max-width: 1480px;
+}
+
+.leftRail {
+  display: grid;
+  gap: 16px;
 }
 
 .panel {
@@ -163,6 +173,16 @@ button:disabled {
   min-width: 32px;
   padding: 3px 8px;
   text-align: center;
+}
+
+.panelHeaderActions {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.hiddenFile {
+  display: none;
 }
 
 .listingList {
@@ -260,6 +280,99 @@ textarea {
   padding: 16px;
 }
 
+.costStack {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.metricGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.metricGrid div {
+  border: 1px solid #e4e9e1;
+  border-radius: 7px;
+  display: grid;
+  gap: 4px;
+  min-height: 82px;
+  padding: 10px;
+}
+
+.metricGrid strong,
+.providerList strong {
+  color: #243229;
+}
+
+.metricGrid small,
+.providerList small,
+.mutedLine {
+  color: #6d7b71;
+  font-size: 0.82rem;
+}
+
+.providerList {
+  display: grid;
+  gap: 8px;
+}
+
+.providerList div {
+  align-items: center;
+  border: 1px solid #e4e9e1;
+  border-radius: 7px;
+  display: grid;
+  gap: 3px 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 9px;
+}
+
+.providerList small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.providerList span {
+  font-weight: 700;
+  grid-row: 1 / span 2;
+  grid-column: 2;
+}
+
+.stepList {
+  display: grid;
+  gap: 8px;
+}
+
+.stepList details {
+  border: 1px solid #e4e9e1;
+  border-radius: 7px;
+  padding: 9px 10px;
+}
+
+.stepList summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.stepList summary span {
+  font-weight: 700;
+}
+
+.stepList summary small {
+  color: #1f6f5b;
+  font-weight: 700;
+}
+
+.stepList details p {
+  margin-top: 8px;
+}
+
 .suggestionStack section {
   border-bottom: 1px solid #e9ede6;
   padding-bottom: 14px;
@@ -295,12 +408,16 @@ textarea {
   padding: 16px;
 }
 
+.emptyState.compact {
+  padding: 4px 0;
+}
+
 @media (max-width: 1120px) {
   .workspace {
     grid-template-columns: 1fr 1fr;
   }
 
-  .listingsPane {
+  .leftRail {
     grid-column: 1 / -1;
   }
 }

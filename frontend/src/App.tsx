@@ -1,11 +1,12 @@
 import { Plus, RefreshCw, Save, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ProductListingApi } from "./api/ProductListingApi";
+import { CostSummaryPanel } from "./components/CostSummaryPanel";
 import { ListingEditor } from "./components/ListingEditor";
 import { ListingsPane } from "./components/ListingsPane";
 import { SuggestionPanel } from "./components/SuggestionPanel";
 import { ProductListingFormMapper, ProductListingFormState } from "./services/ProductListingFormMapper";
-import { ProductListing } from "./types";
+import { AgentRun, AgentRunCostSummary, ProductListing } from "./types";
 
 const api = new ProductListingApi(import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api");
 const mapper = new ProductListingFormMapper();
@@ -14,6 +15,8 @@ export function App() {
   const [listings, setListings] = useState<ProductListing[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<ProductListingFormState>(mapper.empty());
+  const [agentRun, setAgentRun] = useState<AgentRun | null>(null);
+  const [costSummary, setCostSummary] = useState<AgentRunCostSummary | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -24,11 +27,22 @@ export function App() {
 
   useEffect(() => {
     void loadListings();
+    void loadCostSummary();
   }, []);
 
   useEffect(() => {
     setForm(selectedListing ? mapper.fromListing(selectedListing) : mapper.empty());
   }, [selectedListing]);
+
+  useEffect(() => {
+    const runId = selectedListing?.latestSuggestion?.agentRunId;
+
+    if (runId) {
+      void loadAgentRun(runId);
+    } else {
+      setAgentRun(null);
+    }
+  }, [selectedListing?.latestSuggestion?.agentRunId]);
 
   async function loadListings() {
     setBusy(true);
@@ -41,6 +55,22 @@ export function App() {
       setNotice(error instanceof Error ? error.message : "Unable to load listings.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function loadAgentRun(id: string) {
+    try {
+      setAgentRun(await api.getAgentRun(id));
+    } catch {
+      setAgentRun(null);
+    }
+  }
+
+  async function loadCostSummary() {
+    try {
+      setCostSummary(await api.costSummary());
+    } catch {
+      setCostSummary(null);
     }
   }
 
@@ -68,12 +98,27 @@ export function App() {
 
     setBusy(true);
     try {
-      await api.optimize(selectedListing.id);
+      const run = await api.optimize(selectedListing.id);
       await loadListings();
+      await loadCostSummary();
       setSelectedId(selectedListing.id);
+      setAgentRun(run);
       setNotice("Optimization run completed.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to optimize listing.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function importCsv(file: File) {
+    setBusy(true);
+    try {
+      const result = await api.importCsv(file);
+      await loadListings();
+      setNotice(`Imported ${result.createdCount} new and ${result.updatedCount} updated ${result.format} listings. ${result.errorCount} row errors.`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Unable to import CSV.");
     } finally {
       setBusy(false);
     }
@@ -114,13 +159,18 @@ export function App() {
       {notice && <div className="notice">{notice}</div>}
 
       <section className="workspace">
-        <ListingsPane
-          listings={listings}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-        />
+        <div className="leftRail">
+          <ListingsPane
+            listings={listings}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onImport={importCsv}
+            disabled={busy}
+          />
+          <CostSummaryPanel summary={costSummary} />
+        </div>
         <ListingEditor form={form} onChange={setForm} />
-        <SuggestionPanel listing={selectedListing} />
+        <SuggestionPanel listing={selectedListing} agentRun={agentRun} />
       </section>
     </main>
   );

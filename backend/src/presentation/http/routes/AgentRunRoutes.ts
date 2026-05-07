@@ -7,6 +7,7 @@ export class AgentRunRoutes {
 
   build(): Router {
     const router = Router();
+    router.get("/cost-summary", asyncHandler(this.controller.costSummary));
     router.get("/:id", asyncHandler(this.controller.show));
     return router;
   }

@@ -1,3 +1,5 @@
+import type { AgentStepRun } from "./AgentStepRun.js";
+
 export type AgentRunStatus = "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED";
 
 export type AgentRun = {
@@ -9,6 +11,7 @@ export type AgentRun = {
   errorMessage: string | null;
   analysis: Record<string, unknown>;
   metadata: Record<string, unknown>;
+  steps: AgentStepRun[];
   createdAt: Date;
   updatedAt: Date;
 };

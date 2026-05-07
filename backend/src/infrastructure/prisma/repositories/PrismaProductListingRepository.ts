@@ -5,7 +5,10 @@ import {
   ProductListingInput,
   ProductListingWithSuggestion
 } from "../../../domain/entities/ProductListing.js";
-import { ProductListingRepository } from "../../../domain/repositories/ProductListingRepository.js";
+import {
+  ImportedProductListingResult,
+  ProductListingRepository
+} from "../../../domain/repositories/ProductListingRepository.js";
 import { ProductListingMapper } from "../mappers/ProductListingMapper.js";
 
 export class PrismaProductListingRepository implements ProductListingRepository {
@@ -38,6 +41,21 @@ export class PrismaProductListingRepository implements ProductListingRepository 
     return this.mapper.toDomain(record);
   }
 
+  async upsertImported(input: ProductListingInput): Promise<ImportedProductListingResult> {
+    const existing = await this.findExistingImported(input);
+
+    if (existing) {
+      const record = await this.prisma.productListing.update({
+        where: { id: existing.id },
+        data: this.toUpdateData(input)
+      });
+
+      return { listing: this.mapper.toDomain(record), created: false };
+    }
+
+    return { listing: await this.create(input), created: true };
+  }
+
   async update(id: ProductListingId, input: Partial<ProductListingInput>): Promise<ProductListing> {
     const record = await this.prisma.productListing.update({
       where: { id },
@@ -49,6 +67,25 @@ export class PrismaProductListingRepository implements ProductListingRepository 
 
   async delete(id: ProductListingId): Promise<void> {
     await this.prisma.productListing.delete({ where: { id } });
+  }
+
+  private async findExistingImported(input: ProductListingInput): Promise<ProductListing | null> {
+    if (input.shopifyProductId) {
+      const record = await this.prisma.productListing.findUnique({
+        where: { shopifyProductId: input.shopifyProductId }
+      });
+      return record ? this.mapper.toDomain(record) : null;
+    }
+
+    if (input.handle) {
+      const record = await this.prisma.productListing.findFirst({
+        where: { handle: input.handle },
+        orderBy: { updatedAt: "desc" }
+      });
+      return record ? this.mapper.toDomain(record) : null;
+    }
+
+    return null;
   }
 
   private toCreateData(input: ProductListingInput): Prisma.ProductListingUncheckedCreateInput {

@@ -10,8 +10,7 @@ const EnvironmentSchema = z.object({
   API_PORT: z.coerce.number().int().positive().default(4000),
   FRONTEND_ORIGIN: z.string().url().default("http://localhost:5173"),
   LLM_API_URL: z.string().optional().default(""),
-  LLM_API_KEY: z.string().optional().default(""),
-  LLM_MODEL: z.string().optional().default("listing-optimizer")
+  LLM_API_KEY: z.string().optional().default("")
 });
 
 export type EnvironmentValues = z.infer<typeof EnvironmentSchema>;
@@ -43,7 +42,7 @@ export class Environment {
     return this.values.LLM_API_KEY;
   }
 
-  get llmModel(): string {
-    return this.values.LLM_MODEL;
+  getOptional(name: string): string {
+    return process.env[name] ?? "";
   }
 }

@@ -29,6 +29,7 @@ export type ProductListingWithSuggestion = ProductListing & {
 
 export type OptimizationSuggestionSummary = {
   id: string;
+  agentRunId: string;
   improvedTitle: string | null;
   improvedDescription: string;
   tags: string[];

@@ -1,4 +1,5 @@
 import { AgentRun } from "../../../domain/entities/AgentRun.js";
+import { AgentStepRunMapper, PrismaAgentStepRun } from "./AgentStepRunMapper.js";
 
 type PrismaAgentRun = {
   id: string;
@@ -9,11 +10,14 @@ type PrismaAgentRun = {
   errorMessage: string | null;
   analysis: unknown;
   metadata: unknown;
+  steps?: PrismaAgentStepRun[];
   createdAt: Date;
   updatedAt: Date;
 };
 
 export class AgentRunMapper {
+  private readonly stepMapper = new AgentStepRunMapper();
+
   toDomain(record: PrismaAgentRun): AgentRun {
     return {
       id: record.id,
@@ -24,6 +28,7 @@ export class AgentRunMapper {
       errorMessage: record.errorMessage,
       analysis: this.toObject(record.analysis),
       metadata: this.toObject(record.metadata),
+      steps: record.steps?.map((step) => this.stepMapper.toDomain(step)) ?? [],
       createdAt: record.createdAt,
       updatedAt: record.updatedAt
     };

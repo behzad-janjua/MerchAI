@@ -1,18 +1,50 @@
-import { CircleGauge, Package } from "lucide-react";
+import { CircleGauge, Package, Upload } from "lucide-react";
+import { type ChangeEvent, useRef } from "react";
 import { ProductListing } from "../types";
 
 type ListingsPaneProps = {
   listings: ProductListing[];
   selectedId: string | null;
   onSelect(id: string): void;
+  onImport(file: File): void;
+  disabled?: boolean;
 };
 
-export function ListingsPane({ listings, selectedId, onSelect }: ListingsPaneProps) {
+export function ListingsPane({ listings, selectedId, onSelect, onImport, disabled = false }: ListingsPaneProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (file) {
+      onImport(file);
+      event.target.value = "";
+    }
+  }
+
   return (
     <aside className="panel listingsPane">
       <div className="panelHeader">
         <h2>Listings</h2>
-        <span>{listings.length}</span>
+        <div className="panelHeaderActions">
+          <span>{listings.length}</span>
+          <button
+            className="iconButton small"
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={disabled}
+            title="Import CSV"
+          >
+            <Upload size={16} />
+          </button>
+          <input
+            ref={fileInputRef}
+            className="hiddenFile"
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleFileChange}
+          />
+        </div>
       </div>
       <div className="listingList">
         {listings.map((listing) => (
