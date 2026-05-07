@@ -1,6 +1,6 @@
 # MerchAI
 
-AI agent for Shopify product listing optimization built with Ruby on Rails, React, and PostgreSQL.
+AI agent for Shopify product listing optimization built with TypeScript, Prisma, React, and PostgreSQL.
 
 ## What It Does
 
@@ -11,24 +11,17 @@ AI agent for Shopify product listing optimization built with Ruby on Rails, Reac
 
 ## Stack
 
-- Rails 6.1 API
+- Node.js + Express
+- Prisma ORM
 - PostgreSQL
 - React + Vite
 
 ## Local Setup
 
 ```bash
-bundle install
-bin/rails db:setup
-bin/rails server
-```
-
-In another terminal:
-
-```bash
-cd frontend
 npm install
-npm run dev
+npm run prisma:migrate
+npm run dev:backend
 ```
 
-Copy `.env.example` to `.env` if you want to wire in an external LLM provider.
+Copy `.env.example` to `.env` and replace the database or LLM values for your machine.

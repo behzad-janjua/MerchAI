@@ -5,15 +5,12 @@ tmp/*
 !/tmp/.keep
 
 /node_modules
+/backend/node_modules
 /frontend/node_modules
 /frontend/dist
-
-/vendor/bundle
-/.bundle
+/backend/dist
+/coverage
 
 .env
 .env.*
 !.env.example
-
-coverage
-.byebug_history

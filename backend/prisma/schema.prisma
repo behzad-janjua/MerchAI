@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AgentRunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model ProductListing {
+  id                 String                   @id @default(cuid())
+  shopifyProductId   String?                  @unique
+  title              String
+  handle             String?
+  vendor             String?
+  productType        String?
+  description        String?
+  tags               String[]                 @default([])
+  price              Decimal?                 @db.Decimal(10, 2)
+  currency           String                   @default("USD")
+  inventoryQuantity  Int?
+  rawData            Json                     @default("{}")
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  agentRuns          AgentRun[]
+  suggestions        OptimizationSuggestion[]
+
+  @@index([handle])
+  @@index([updatedAt])
+}
+
+model AgentRun {
+  id               String                  @id @default(cuid())
+  productListingId String
+  status           AgentRunStatus          @default(QUEUED)
+  startedAt        DateTime?
+  completedAt      DateTime?
+  errorMessage     String?
+  analysis         Json                    @default("{}")
+  metadata         Json                    @default("{}")
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  productListing   ProductListing          @relation(fields: [productListingId], references: [id], onDelete: Cascade)
+  suggestion       OptimizationSuggestion?
+
+  @@index([productListingId, createdAt])
+}
+
+model OptimizationSuggestion {
+  id                         String         @id @default(cuid())
+  productListingId           String
+  agentRunId                 String         @unique
+  improvedTitle              String?
+  improvedDescription        String
+  tags                       String[]       @default([])
+  positioningRecommendations String?
+  seoNotes                   String?
+  score                      Decimal?       @db.Decimal(5, 2)
+  rationale                  String?
+  accepted                   Boolean        @default(false)
+  createdAt                  DateTime       @default(now())
+  updatedAt                  DateTime       @updatedAt
+  productListing             ProductListing @relation(fields: [productListingId], references: [id], onDelete: Cascade)
+  agentRun                   AgentRun       @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+
+  @@index([productListingId, createdAt])
+}
