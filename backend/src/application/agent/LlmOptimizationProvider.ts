@@ -6,14 +6,12 @@ import {
   OptimizationProviderRequest,
   OptimizationProviderResult
 } from "./OptimizationProvider.js";
-import { PromptBuilder } from "./OptimizationPromptBuilder.js";
 
 export class LlmOptimizationProvider implements OptimizationProvider {
   readonly providerName: string;
 
   constructor(
     private readonly environment: Environment,
-    private readonly promptBuilder: PromptBuilder,
     private readonly config: LlmProviderConfig
   ) {
     this.providerName = config.key;
@@ -26,9 +24,7 @@ export class LlmOptimizationProvider implements OptimizationProvider {
       return null;
     }
 
-    const prompt =
-      request.prompt ||
-      this.promptBuilder.buildStep(request.stepName, request.snapshot, request.analysis, request.priorStepResponses);
+    const prompt = request.prompt;
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: this.headers(),

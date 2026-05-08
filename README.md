@@ -1,6 +1,6 @@
 # MerchAI
 
-Portfolio MVP for a Shopify Product Listing Optimization Agent. MerchAI imports product listings, runs a specialized multi-step AI agent pipeline, tracks estimated LLM cost, and presents actionable listing improvements in a React workspace.
+Portfolio MVP for a Shopify Product Listing Optimization Agent. MerchAI imports product listings, runs a specialized multi-step AI agent pipeline, tracks estimated LLM cost, and presents actionable listing improvements in a Ruby on Rails workspace.
 
 ## What It Does
 
@@ -10,7 +10,7 @@ Portfolio MVP for a Shopify Product Listing Optimization Agent. MerchAI imports 
 - Stores every step prompt, response, provider, model, token count, estimated cost, status, and error.
 - Produces improved titles, descriptions, tags, positioning notes, SEO notes, rationale, and quality scores.
 - Falls back to deterministic demo behavior when no external LLM API key is configured.
-- Shows listing editing, CSV import, agent step findings, final suggestions, and cost summary in the frontend.
+- Shows listing editing, CSV import, agent step findings, final suggestions, and cost summary in a Rails server-rendered UI.
 
 ## Architecture
 
@@ -20,12 +20,15 @@ Portfolio MVP for a Shopify Product Listing Optimization Agent. MerchAI imports 
 - `backend/src/domain/`: entities and repository interfaces.
 - `backend/src/infrastructure/prisma/`: Prisma repositories and mappers.
 - `backend/src/presentation/http/`: controllers, routes, serializers, request parsing.
-- `frontend/`: React + Vite workspace with modular API client, form mapper, and presentational components.
+- `app/`: Ruby on Rails UI with controllers, views, assets, and an API client service.
+- `config/`: Rails routes and environment configuration.
 
 ## Requirements
 
 - Node.js 20+
 - Yarn 1.22+
+- Ruby 3.4.4, managed with rbenv or another Ruby version manager
+- Bundler 2.6+
 - PostgreSQL
 - A local `.env` file copied from `.env.example`
 
@@ -34,10 +37,11 @@ Portfolio MVP for a Shopify Product Listing Optimization Agent. MerchAI imports 
 Install dependencies:
 
 ```bash
+scripts/with-ruby.sh bundle install
 yarn install
 ```
 
-For a fresh local setup, copy the env file and run the setup script. This installs dependencies from `yarn.lock`, runs Prisma migrations, generates the Prisma client, and seeds demo data.
+For a fresh local setup, copy the env file and run the setup script. This installs Ruby gems and Node packages, runs Prisma migrations, generates the Prisma client, and seeds demo data.
 
 ```bash
 cp .env.example .env
@@ -76,7 +80,7 @@ To run only one side of the app:
 
 ```bash
 yarn dev:backend
-yarn dev:frontend
+yarn dev:rails
 ```
 
 Default URLs:
@@ -90,7 +94,7 @@ Default URLs:
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/merchai?schema=public"
 API_PORT=4000
 FRONTEND_ORIGIN="http://localhost:5173"
-VITE_API_BASE_URL="http://localhost:4000/api"
+MERCHAI_API_BASE_URL="http://localhost:4000/api"
 
 # Provider/model/cost settings live in Prisma LlmProviderConfig.
 # Seed creates a Gemini Free Demo provider that reads this key when available.
@@ -112,7 +116,7 @@ POST /api/product-listings/import-csv
 Content-Type: multipart/form-data
 ```
 
-The frontend sends a file upload from the Listings panel. The backend also accepts raw `text/csv`.
+The Rails UI sends a file upload from the Listings panel. The backend also accepts raw `text/csv`.
 
 Simple demo template:
 
@@ -145,7 +149,7 @@ Import responses include `createdCount`, `updatedCount`, detected `format`, and 
 
 ## Demo Walkthrough
 
-1. Start PostgreSQL, the backend, and the frontend.
+1. Start PostgreSQL, the backend API, and the Rails UI.
 2. Import a Shopify export or the simple CSV template from the Listings panel.
 3. Select a listing and optionally edit product data.
 4. Click Optimize.
@@ -158,8 +162,8 @@ Import responses include `createdCount`, `updatedCount`, detected `format`, and 
 - Provider abstraction: provider/model/cost settings live in Prisma, so new LLMs can be added as provider config records.
 - Cost visibility: `AgentStepRun` captures provider/model usage, token counts, and estimated cost for dashboard reporting.
 - Shopify data readiness: CSV import supports Shopify exports and a clean demo template with row-level validation.
-- Full-stack implementation: Express/Prisma/PostgreSQL backend with a React/Vite review workspace.
-- Maintainable shape: controllers, services, repositories, mappers, API clients, and presentational components stay separated.
+- Full-stack implementation: Express/Prisma/PostgreSQL backend with a Rails review workspace.
+- Maintainable shape: backend controllers, services, repositories, mappers, Rails controllers, views, and API client code stay separated.
 
 ## Verification
 
@@ -167,4 +171,5 @@ Import responses include `createdCount`, `updatedCount`, detected `format`, and 
 yarn prisma:generate
 yarn build
 yarn test:backend
+scripts/with-ruby.sh bundle exec rails routes
 ```

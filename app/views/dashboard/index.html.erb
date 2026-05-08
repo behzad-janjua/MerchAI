@@ -1,0 +1,212 @@
+<main class="shell">
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Shopify listing agent</p>
+      <h1>MerchAI</h1>
+    </div>
+    <div class="topbarActions">
+      <%= link_to "Refresh", root_path, class: "secondaryButton" %>
+      <%= link_to "New", new_listing_path, class: "secondaryButton" %>
+      <%= button_tag "Save", form: "listing-form", class: "primaryButton" %>
+      <% if @selected_listing %>
+        <%= button_to "Optimize", optimize_listing_path(@selected_listing["id"]), method: :post, class: "primaryButton accent" %>
+      <% else %>
+        <button class="primaryButton accent" disabled>Optimize</button>
+      <% end %>
+    </div>
+  </header>
+
+  <% if notice.present? %>
+    <div class="notice"><%= notice %></div>
+  <% end %>
+  <% if alert.present? %>
+    <div class="notice alert"><%= alert %></div>
+  <% end %>
+
+  <section class="workspace">
+    <div class="leftRail">
+      <aside class="panel listingsPane">
+        <div class="panelHeader">
+          <h2>Listings</h2>
+          <span><%= @listings.length %></span>
+        </div>
+        <div class="importBox">
+          <%= form_with url: import_listings_path, multipart: true, local: true do |form| %>
+            <%= form.file_field :csv, accept: ".csv,text/csv" %>
+            <%= form.submit "Import CSV", class: "secondaryButton" %>
+          <% end %>
+        </div>
+        <div class="listingList">
+          <% @listings.each do |listing| %>
+            <% selected = @selected_listing && listing["id"] == @selected_listing["id"] %>
+            <%= link_to listing_path(listing["id"]), class: selected ? "listingItem selected" : "listingItem" do %>
+              <span class="listingIcon">P</span>
+              <span class="listingText">
+                <strong><%= listing["title"] %></strong>
+                <small><%= listing["productType"].presence || listing["vendor"].presence || "Uncategorized" %></small>
+              </span>
+              <span class="scoreBadge"><%= suggestion_for(listing)&.fetch("score", nil) || "--" %></span>
+            <% end %>
+          <% end %>
+          <% if @listings.empty? %>
+            <p class="emptyState">No listings yet.</p>
+          <% end %>
+        </div>
+      </aside>
+
+      <aside class="panel costPane">
+        <div class="panelHeader">
+          <h2>Cost</h2>
+          <span><%= money(@cost_summary&.fetch("totalEstimatedCost", 0)) %></span>
+        </div>
+        <% if @cost_summary %>
+          <div class="costStack">
+            <div class="metricGrid">
+              <div>
+                <strong><%= money(@cost_summary.fetch("totalEstimatedCost", 0)) %></strong>
+                <small>estimated total</small>
+              </div>
+              <div>
+                <strong><%= @cost_summary.fetch("totalStepRuns", 0) %></strong>
+                <small>agent steps</small>
+              </div>
+            </div>
+            <section>
+              <h3>Provider Mix</h3>
+              <div class="providerList">
+                <% @cost_summary.fetch("byProviderModel", []).each do |group| %>
+                  <div>
+                    <strong><%= group["provider"] %></strong>
+                    <small><%= group["model"] %></small>
+                    <span><%= money(group["estimatedCost"]) %></span>
+                  </div>
+                <% end %>
+                <% if @cost_summary.fetch("byProviderModel", []).empty? %>
+                  <p class="emptyState compact">No step costs yet.</p>
+                <% end %>
+              </div>
+            </section>
+          </div>
+        <% else %>
+          <p class="emptyState">Run the agent to populate cost data.</p>
+        <% end %>
+      </aside>
+    </div>
+
+    <section class="panel editorPane">
+      <div class="panelHeader">
+        <h2>Product Data</h2>
+      </div>
+      <%= form_with url: save_listing_path, scope: :listing, local: true, html: { id: "listing-form", class: "formGrid" } do |form| %>
+        <% if @form["id"].present? %>
+          <%= hidden_field_tag :id, @form["id"] %>
+        <% end %>
+        <label>
+          <span>Title</span>
+          <%= form.text_field :title, value: @form["title"] %>
+        </label>
+        <label>
+          <span>Shopify ID</span>
+          <%= form.text_field :shopifyProductId, value: @form["shopifyProductId"] %>
+        </label>
+        <label>
+          <span>Handle</span>
+          <%= form.text_field :handle, value: @form["handle"] %>
+        </label>
+        <label>
+          <span>Vendor</span>
+          <%= form.text_field :vendor, value: @form["vendor"] %>
+        </label>
+        <label>
+          <span>Product Type</span>
+          <%= form.text_field :productType, value: @form["productType"] %>
+        </label>
+        <label>
+          <span>Currency</span>
+          <%= form.text_field :currency, value: @form["currency"], maxlength: 3 %>
+        </label>
+        <label>
+          <span>Price</span>
+          <%= form.text_field :price, value: @form["price"], inputmode: "decimal" %>
+        </label>
+        <label>
+          <span>Inventory</span>
+          <%= form.text_field :inventoryQuantity, value: @form["inventoryQuantity"], inputmode: "numeric" %>
+        </label>
+        <label class="wide">
+          <span>Tags</span>
+          <%= form.text_field :tags, value: @form["tags"] %>
+        </label>
+        <label class="wide">
+          <span>Audience</span>
+          <%= form.text_field :audience, value: @form["audience"] %>
+        </label>
+        <label class="wide">
+          <span>Description</span>
+          <%= form.text_area :description, value: @form["description"] %>
+        </label>
+      <% end %>
+    </section>
+
+    <aside class="panel suggestionPane">
+      <% suggestion = suggestion_for(@selected_listing) %>
+      <div class="panelHeader">
+        <h2>Suggestion</h2>
+        <span><%= suggestion&.fetch("score", nil) || "--" %></span>
+      </div>
+
+      <% if suggestion.blank? %>
+        <p class="emptyState">Run an optimization to generate recommendations.</p>
+      <% else %>
+        <div class="suggestionStack">
+          <section>
+            <h3>Agent Steps</h3>
+            <% if @agent_run && @agent_run.fetch("steps", []).any? %>
+              <div class="stepList">
+                <% @agent_run.fetch("steps", []).each do |step| %>
+                  <details <%= "open" if step["stepName"] == "final_synthesis" %>>
+                    <summary>
+                      <span><%= step_name(step["stepName"]) %></span>
+                      <small><%= money(step["estimatedCost"]) %></small>
+                    </summary>
+                    <p class="descriptionCopy"><%= step["response"].presence || step["errorMessage"].presence || "No response recorded." %></p>
+                    <small class="mutedLine">
+                      <%= step["provider"].presence || "unknown" %> / <%= step["model"].presence || "unknown" %> -
+                      <%= step["inputTokens"].to_i + step["outputTokens"].to_i %> tokens
+                    </small>
+                  </details>
+                <% end %>
+              </div>
+            <% else %>
+              <p class="mutedLine">Run details will appear after the latest agent run is loaded.</p>
+            <% end %>
+          </section>
+          <section>
+            <h3>Title</h3>
+            <p><%= suggestion["improvedTitle"].presence || @selected_listing["title"] %></p>
+          </section>
+          <section>
+            <h3>Description</h3>
+            <p class="descriptionCopy"><%= suggestion["improvedDescription"] %></p>
+          </section>
+          <section>
+            <h3>Tags</h3>
+            <div class="tagWrap">
+              <% suggestion.fetch("tags", []).each do |tag| %>
+                <span><%= tag %></span>
+              <% end %>
+            </div>
+          </section>
+          <section>
+            <h3>Positioning</h3>
+            <p><%= suggestion["positioningRecommendations"] %></p>
+          </section>
+          <section>
+            <h3>SEO</h3>
+            <p><%= suggestion["seoNotes"] %></p>
+          </section>
+        </div>
+      <% end %>
+    </aside>
+  </section>
+</main>

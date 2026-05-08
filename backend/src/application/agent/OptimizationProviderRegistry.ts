@@ -3,12 +3,10 @@ import { LlmProviderConfigRepository } from "../../domain/repositories/LlmProvid
 import { FallbackOptimizationProvider } from "./FallbackOptimizationProvider.js";
 import { LlmOptimizationProvider } from "./LlmOptimizationProvider.js";
 import { OptimizationProvider } from "./OptimizationProvider.js";
-import { PromptBuilder } from "./OptimizationPromptBuilder.js";
 
 export class OptimizationProviderRegistry {
   constructor(
     private readonly environment: Environment,
-    private readonly promptBuilder: PromptBuilder,
     private readonly providerConfigs: LlmProviderConfigRepository
   ) {}
 
@@ -18,7 +16,7 @@ export class OptimizationProviderRegistry {
 
     if (config?.provider === "openai-compatible") {
       return [
-        new LlmOptimizationProvider(this.environment, this.promptBuilder, config),
+        new LlmOptimizationProvider(this.environment, config),
         fallback
       ];
     }

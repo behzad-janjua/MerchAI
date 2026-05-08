@@ -49,7 +49,7 @@ export class ApplicationContainer {
 
     const promptBuilder = new OptimizationPromptBuilder();
     const generator = new OptimizationSuggestionGenerator(
-      new OptimizationProviderRegistry(this.environment, promptBuilder, llmProviderConfigs)
+      new OptimizationProviderRegistry(this.environment, llmProviderConfigs)
     );
 
     const pipeline = new ProductOptimizationPipeline(

@@ -10,6 +10,9 @@ tmp/*
 /frontend/dist
 /backend/dist
 /coverage
+/.bundle
+/vendor/bundle
+/public/assets
 
 .env
 .env.*
