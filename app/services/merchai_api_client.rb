@@ -42,7 +42,7 @@ class MerchaiApiClient
   attr_reader :base_uri
 
   def request(method, path, json: nil, body: nil, content_type: "application/json")
-    uri = base_uri + path
+    uri = URI("#{base_uri}#{path}")
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = uri.scheme == "https"
     request = request_class(method).new(uri)
