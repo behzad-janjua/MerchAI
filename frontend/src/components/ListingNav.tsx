@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import type { CostSummary, ProductListing } from "../types";
 
 type Props = {
@@ -20,6 +21,19 @@ function money(value: number | null | undefined): string {
   return `$${(value ?? 0).toFixed(4)}`;
 }
 
+const listItem = {
+  hidden: { opacity: 0, x: -10 },
+  show: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.035,
+      duration: 0.22,
+      ease: [0.23, 1, 0.32, 1] as [number, number, number, number],
+    },
+  }),
+};
+
 export function ListingNav({ listings, selectedId, costSummary, onSelect, onImportCsv }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -27,10 +41,7 @@ export function ListingNav({ listings, selectedId, costSummary, onSelect, onImpo
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      const csv = ev.target?.result as string;
-      onImportCsv(csv);
-    };
+    reader.onload = (ev) => onImportCsv(ev.target?.result as string);
     reader.readAsText(file);
     if (fileRef.current) fileRef.current.value = "";
   }
@@ -50,50 +61,57 @@ export function ListingNav({ listings, selectedId, costSummary, onSelect, onImpo
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
           Import CSV
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".csv,text/csv"
-            onChange={handleFileChange}
-          />
+          <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={handleFileChange} />
         </label>
       </div>
 
       <div className="listing-nav">
-        {listings.length === 0 ? (
-          <div className="empty">
-            <div className="empty-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M3 9h18M9 21V9" />
-              </svg>
-            </div>
-            <strong>No listings yet</strong>
-            <span>Import a CSV or create your first listing above</span>
-          </div>
-        ) : (
-          listings.map((listing) => {
-            const score = listing.latestSuggestion?.score ?? null;
-            const selected = listing.id === selectedId;
-            return (
-              <button
-                key={listing.id}
-                className={`listing-item${selected ? " selected" : ""}`}
-                onClick={() => onSelect(listing.id)}
-                aria-pressed={selected}
-              >
-                <span className="listing-glyph">{listing.title[0]?.toUpperCase() ?? "?"}</span>
-                <span className="listing-meta">
-                  <strong>{listing.title}</strong>
-                  <small>{listing.productType ?? listing.vendor ?? "Uncategorized"}</small>
-                </span>
-                {score != null && (
-                  <span className={`score-pill ${scoreClass(score)}`}>{score}</span>
-                )}
-              </button>
-            );
-          })
-        )}
+        <AnimatePresence>
+          {listings.length === 0 ? (
+            <motion.div
+              className="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M3 9h18M9 21V9" />
+                </svg>
+              </div>
+              <strong>No listings yet</strong>
+              <span>Import a CSV or create your first listing</span>
+            </motion.div>
+          ) : (
+            listings.map((listing, i) => {
+              const score = listing.latestSuggestion?.score ?? null;
+              const selected = listing.id === selectedId;
+              return (
+                <motion.button
+                  key={listing.id}
+                  custom={i}
+                  variants={listItem}
+                  initial="hidden"
+                  animate="show"
+                  className={`listing-item${selected ? " selected" : ""}`}
+                  onClick={() => onSelect(listing.id)}
+                  whileTap={{ scale: 0.98 }}
+                  aria-pressed={selected}
+                >
+                  <span className="listing-glyph">{listing.title[0]?.toUpperCase() ?? "?"}</span>
+                  <span className="listing-meta">
+                    <strong>{listing.title}</strong>
+                    <small>{listing.productType ?? listing.vendor ?? "Uncategorized"}</small>
+                  </span>
+                  {score != null && (
+                    <span className={`score-pill ${scoreClass(score)}`}>{score}</span>
+                  )}
+                </motion.button>
+              );
+            })
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="cost-section">

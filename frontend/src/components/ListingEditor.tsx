@@ -1,3 +1,4 @@
+import { motion, AnimatePresence } from "framer-motion";
 import type { ListingFormData, ProductListing } from "../types";
 
 type Props = {
@@ -127,29 +128,59 @@ export function ListingEditor({ listing, isNew, form, saving, confirmDelete, onC
         </div>
 
         <div className="form-actions">
-          {!isNew && listing && !confirmDelete && (
-            <button
-              className="btn btn-ghost"
-              style={{ color: "var(--error-text)", marginRight: "auto" }}
-              onClick={onDelete}
-            >
-              Delete listing
-            </button>
-          )}
-          {!isNew && listing && confirmDelete && (
-            <div style={{ display: "flex", gap: 6, marginRight: "auto", alignItems: "center" }}>
-              <span style={{ fontSize: 12, color: "var(--gray-600)" }}>Are you sure?</span>
-              <button className="btn btn-danger" style={{ height: 28, padding: "0 10px", fontSize: 12 }} onClick={onDelete}>
-                Yes, delete
-              </button>
-              <button className="btn btn-ghost" style={{ height: 28, padding: "0 10px", fontSize: 12 }} onClick={onCancelDelete}>
-                Cancel
-              </button>
-            </div>
-          )}
-          <button className="btn btn-primary" onClick={onSave} disabled={saving || !form.title.trim()}>
+          <AnimatePresence mode="wait">
+            {!isNew && listing && !confirmDelete && (
+              <motion.button
+                key="delete"
+                className="btn btn-ghost"
+                style={{ color: "var(--error-text)", marginRight: "auto" }}
+                onClick={onDelete}
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -6 }}
+                transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] as [number, number, number, number] }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Delete listing
+              </motion.button>
+            )}
+            {!isNew && listing && confirmDelete && (
+              <motion.div
+                key="confirm"
+                style={{ display: "flex", gap: 6, marginRight: "auto", alignItems: "center" }}
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -6 }}
+                transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] as [number, number, number, number] }}
+              >
+                <span style={{ fontSize: 12, color: "var(--gray-600)" }}>Are you sure?</span>
+                <motion.button
+                  className="btn btn-danger"
+                  style={{ height: 28, padding: "0 10px", fontSize: 12 }}
+                  onClick={onDelete}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Yes, delete
+                </motion.button>
+                <motion.button
+                  className="btn btn-ghost"
+                  style={{ height: 28, padding: "0 10px", fontSize: 12 }}
+                  onClick={onCancelDelete}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Cancel
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <motion.button
+            className="btn btn-primary"
+            onClick={onSave}
+            disabled={saving || !form.title.trim()}
+            whileTap={{ scale: saving ? 1 : 0.97 }}
+          >
             {saving ? "Saving…" : isNew ? "Create listing" : "Save changes"}
-          </button>
+          </motion.button>
         </div>
       </div>
     </div>

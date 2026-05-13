@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { api } from "./api";
 import { Header } from "./components/Header";
 import { ListingEditor } from "./components/ListingEditor";
@@ -202,13 +203,22 @@ export default function App() {
         onRefresh={loadAll}
       />
 
-      {notice && (
-        <div className="notice-wrap">
-          <div className={`notice${notice.kind === "error" ? " alert" : ""}`}>
-            {notice.message}
-          </div>
-        </div>
-      )}
+      <div className="notice-wrap">
+        <AnimatePresence>
+          {notice && (
+            <motion.div
+              key={notice.message}
+              className={`notice${notice.kind === "error" ? " alert" : ""}`}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 6, scale: 0.96 }}
+              transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] as [number, number, number, number] }}
+            >
+              {notice.message}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {loading ? (
         <div className="spinner-wrap" style={{ flex: 1 }}>
