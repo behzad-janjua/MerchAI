@@ -18,9 +18,9 @@ export function Header({ selectedListing, isNew, optimizing, onNew, onOptimize, 
     <header className="app-header">
       <div className="brand">
         <div className="brand-mark">
+          {/* Signal waveform / EKG — intelligence & optimization */}
           <svg viewBox="0 0 24 24">
-            <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z" />
-            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+            <path d="M2 12h3l2-7 2 14 2-10 2 6 2-3h3" />
           </svg>
         </div>
         <div className="brand-text">

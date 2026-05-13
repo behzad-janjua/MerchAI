@@ -6,13 +6,6 @@ type Props = {
   agentRun: AgentRun | null;
 };
 
-function scoreClass(score: number | null | undefined): string {
-  if (score == null) return "";
-  if (score >= 80) return "score--high";
-  if (score >= 60) return "score--mid";
-  return "score--low";
-}
-
 function money(value: number | null | undefined): string {
   if (value == null || value === 0) return "$0.00";
   return `$${value.toFixed(4)}`;
@@ -20,6 +13,36 @@ function money(value: number | null | undefined): string {
 
 function stepLabel(name: string): string {
   return name.split("_").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
+}
+
+function ScoreRing({ score }: { score: number }) {
+  const R = 15;
+  const circ = 2 * Math.PI * R;
+  const dashOffset = circ * (1 - score / 100);
+  const cls = score >= 80 ? "high" : score >= 60 ? "mid" : "low";
+
+  return (
+    <div className={`score-ring score-ring--${cls}`}>
+      <svg width="44" height="44" viewBox="0 0 44 44">
+        <circle
+          cx="22" cy="22" r={R}
+          fill="none" strokeWidth="2.5"
+          stroke="currentColor"
+          className="score-ring-track"
+        />
+        <circle
+          cx="22" cy="22" r={R}
+          fill="none" strokeWidth="2.5"
+          stroke="currentColor"
+          className="score-ring-fill"
+          strokeDasharray={circ}
+          strokeDashoffset={dashOffset}
+          strokeLinecap="round"
+        />
+      </svg>
+      <span className="score-ring-value">{score}</span>
+    </div>
+  );
 }
 
 const sectionVariants = {
@@ -95,16 +118,15 @@ export function SuggestionPanel({ suggestion, agentRun }: Props) {
         <h2>AI Suggestion</h2>
         <AnimatePresence>
           {score != null && (
-            <motion.span
+            <motion.div
               key={score}
-              className={`suggestion-score ${scoreClass(score)}`}
-              initial={{ opacity: 0, scale: 0.85 }}
+              initial={{ opacity: 0, scale: 0.7 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.85 }}
-              transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] as [number, number, number, number] }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] as [number, number, number, number] }}
             >
-              {score}/100
-            </motion.span>
+              <ScoreRing score={score} />
+            </motion.div>
           )}
         </AnimatePresence>
       </div>

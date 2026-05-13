@@ -1,6 +1,29 @@
 import { motion, AnimatePresence } from "framer-motion";
 import type { ListingFormData, ProductListing } from "../types";
 
+const CURRENCIES = [
+  { code: "USD", name: "US Dollar" },
+  { code: "EUR", name: "Euro" },
+  { code: "GBP", name: "British Pound" },
+  { code: "CAD", name: "Canadian Dollar" },
+  { code: "AUD", name: "Australian Dollar" },
+  { code: "NZD", name: "New Zealand Dollar" },
+  { code: "JPY", name: "Japanese Yen" },
+  { code: "CHF", name: "Swiss Franc" },
+  { code: "CNY", name: "Chinese Yuan" },
+  { code: "HKD", name: "Hong Kong Dollar" },
+  { code: "SGD", name: "Singapore Dollar" },
+  { code: "SEK", name: "Swedish Krona" },
+  { code: "NOK", name: "Norwegian Krone" },
+  { code: "DKK", name: "Danish Krone" },
+  { code: "INR", name: "Indian Rupee" },
+  { code: "BRL", name: "Brazilian Real" },
+  { code: "MXN", name: "Mexican Peso" },
+  { code: "ZAR", name: "South African Rand" },
+  { code: "PLN", name: "Polish Złoty" },
+  { code: "TRY", name: "Turkish Lira" },
+];
+
 type Props = {
   listing: ProductListing | null;
   isNew: boolean;
@@ -30,7 +53,7 @@ function Field({ label, name, form, onChange, placeholder, hint, inputMode, text
     <label htmlFor={id}>
       <span className="field-label">
         {label}
-        {hint && <span style={{ fontWeight: 400, color: "var(--gray-400)", marginLeft: 4 }}>{hint}</span>}
+        {hint && <span style={{ fontWeight: 400, color: "var(--text-3)", marginLeft: 4 }}>{hint}</span>}
       </span>
       {textarea ? (
         <textarea
@@ -103,7 +126,18 @@ export function ListingEditor({ listing, isNew, form, saving, confirmDelete, onC
           <p className="form-section-title">Pricing &amp; inventory</p>
           <div className="form-grid">
             <Field label="Price" name="price" form={form} onChange={onChange} placeholder="0.00" inputMode="decimal" />
-            <Field label="Currency" name="currency" form={form} onChange={onChange} placeholder="USD" />
+            <label htmlFor="field-currency">
+              <span className="field-label">Currency</span>
+              <select
+                id="field-currency"
+                value={form.currency}
+                onChange={(e) => onChange("currency", e.target.value)}
+              >
+                {CURRENCIES.map(({ code, name }) => (
+                  <option key={code} value={code}>{code} — {name}</option>
+                ))}
+              </select>
+            </label>
             <label className="span-2" htmlFor="field-inventoryQuantity">
               <span className="field-label">Inventory quantity</span>
               <input
@@ -153,10 +187,10 @@ export function ListingEditor({ listing, isNew, form, saving, confirmDelete, onC
                 exit={{ opacity: 0, x: -6 }}
                 transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] as [number, number, number, number] }}
               >
-                <span style={{ fontSize: 12, color: "var(--gray-600)" }}>Are you sure?</span>
+                <span style={{ fontSize: 13, color: "var(--gray-600)" }}>Are you sure?</span>
                 <motion.button
                   className="btn btn-danger"
-                  style={{ height: 28, padding: "0 10px", fontSize: 12 }}
+                  style={{ height: 28, padding: "0 10px", fontSize: 12.5 }}
                   onClick={onDelete}
                   whileTap={{ scale: 0.97 }}
                 >
@@ -164,7 +198,7 @@ export function ListingEditor({ listing, isNew, form, saving, confirmDelete, onC
                 </motion.button>
                 <motion.button
                   className="btn btn-ghost"
-                  style={{ height: 28, padding: "0 10px", fontSize: 12 }}
+                  style={{ height: 28, padding: "0 10px", fontSize: 12.5 }}
                   onClick={onCancelDelete}
                   whileTap={{ scale: 0.97 }}
                 >
