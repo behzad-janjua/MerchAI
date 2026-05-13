@@ -106,8 +106,8 @@ export function ListingNav({ listings, selectedId, costSummary, onSelect, onImpo
               {costSummary.byProviderModel.length === 0 ? (
                 <p className="muted">No runs yet.</p>
               ) : (
-                costSummary.byProviderModel.map((row, i) => (
-                  <div className="provider-row" key={i}>
+                costSummary.byProviderModel.map((row) => (
+                  <div className="provider-row" key={`${row.provider}:${row.model}`}>
                     <div className="provider-row-info">
                       <b>{row.provider}</b>
                       <small>{row.model}</small>

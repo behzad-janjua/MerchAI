@@ -5,9 +5,11 @@ type Props = {
   isNew: boolean;
   form: ListingFormData;
   saving: boolean;
+  confirmDelete: boolean;
   onChange: (field: keyof ListingFormData, value: string) => void;
   onSave: () => void;
   onDelete: () => void;
+  onCancelDelete: () => void;
 };
 
 type FieldProps = {
@@ -50,7 +52,7 @@ function Field({ label, name, form, onChange, placeholder, hint, inputMode, text
   );
 }
 
-export function ListingEditor({ listing, isNew, form, saving, onChange, onSave, onDelete }: Props) {
+export function ListingEditor({ listing, isNew, form, saving, confirmDelete, onChange, onSave, onDelete, onCancelDelete }: Props) {
   const title = isNew
     ? "New listing"
     : (form.title.trim() || "Untitled listing");
@@ -125,10 +127,21 @@ export function ListingEditor({ listing, isNew, form, saving, onChange, onSave, 
         </div>
 
         <div className="form-actions">
-          {!isNew && listing && (
+          {!isNew && listing && !confirmDelete && (
             <button className="btn btn-ghost" style={{ color: "var(--error-text)", marginRight: "auto" }} onClick={onDelete}>
               Delete listing
             </button>
+          )}
+          {!isNew && listing && confirmDelete && (
+            <div style={{ display: "flex", gap: 6, marginRight: "auto", alignItems: "center" }}>
+              <span style={{ fontSize: 12, color: "var(--gray-600)" }}>Are you sure?</span>
+              <button className="btn btn-danger" style={{ height: 28, padding: "0 10px", fontSize: 12 }} onClick={onDelete}>
+                Yes, delete
+              </button>
+              <button className="btn btn-ghost" style={{ height: 28, padding: "0 10px", fontSize: 12 }} onClick={onCancelDelete}>
+                Cancel
+              </button>
+            </div>
           )}
           <button className="btn btn-primary" onClick={onSave} disabled={saving || !form.title.trim()}>
             {saving ? "Saving…" : isNew ? "Create listing" : "Save changes"}

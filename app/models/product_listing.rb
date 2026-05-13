@@ -1,16 +1,15 @@
 class ProductListing < ApplicationRecord
   has_many :agent_runs, dependent: :destroy
   has_many :optimization_suggestions, dependent: :destroy
+  has_one  :latest_suggestion,
+    -> { order(created_at: :desc) },
+    class_name: "OptimizationSuggestion"
 
   validates :title, presence: true
   validates :currency, format: { with: /\A[A-Za-z]{3}\z/ }
   validates :price, numericality: { greater_than_or_equal_to: 0, allow_nil: true }
 
   before_validation :set_defaults
-
-  def latest_suggestion
-    optimization_suggestions.order(created_at: :desc).first
-  end
 
   def as_api_json
     suggestion = latest_suggestion

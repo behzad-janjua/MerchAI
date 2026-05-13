@@ -5,12 +5,13 @@ module Api
 
       def index
         listings = ProductListing
-          .includes(:optimization_suggestions)
+          .includes(:latest_suggestion)
           .order(updated_at: :desc)
         render json: listings.map(&:as_api_json)
       end
 
       def show
+        @listing.association(:latest_suggestion).reset
         render json: @listing.as_api_json
       end
 
@@ -31,6 +32,14 @@ module Api
 
       def optimize
         run = Agent::ProductOptimizationPipeline.new.run(@listing)
+
+        if run.status == "failed"
+          return render json: {
+            error: "optimization_failed",
+            message: run.error_message || "Pipeline failed without a message."
+          }, status: :unprocessable_entity
+        end
+
         render json: run.as_api_json, status: :created
       rescue => e
         render json: { error: "optimization_failed", message: e.message }, status: :unprocessable_entity
@@ -53,16 +62,18 @@ module Api
         created_count = 0
         updated_count = 0
 
-        result.rows.each do |row|
-          shopify_id = row[:shopify_product_id]
-          existing   = shopify_id.present? ? ProductListing.find_by(shopify_product_id: shopify_id) : nil
+        ActiveRecord::Base.transaction do
+          result.rows.each do |row|
+            shopify_id = row[:shopify_product_id]
+            existing   = shopify_id.present? ? ProductListing.find_by(shopify_product_id: shopify_id) : nil
 
-          if existing
-            existing.update!(row.except(:shopify_product_id))
-            updated_count += 1
-          else
-            ProductListing.create!(row)
-            created_count += 1
+            if existing
+              existing.update!(row.except(:shopify_product_id))
+              updated_count += 1
+            else
+              ProductListing.create!(row)
+              created_count += 1
+            end
           end
         end
 
@@ -93,7 +104,14 @@ module Api
       end
 
       def listing_update_params
-        params.require(:listing).permit(
+        permitted = params.permit(
+          listing: [
+            :shopify_product_id, :title, :handle, :vendor, :product_type,
+            :description, :price, :currency, :inventory_quantity,
+            { tags: [], raw_data: {} }
+          ]
+        )
+        permitted[:listing] || params.permit(
           :shopify_product_id, :title, :handle, :vendor, :product_type,
           :description, :price, :currency, :inventory_quantity,
           tags: [], raw_data: {}

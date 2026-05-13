@@ -40,6 +40,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [optimizing, setOptimizing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -51,6 +52,11 @@ export default function App() {
     noticeTimer.current = setTimeout(() => setNotice(null), 4000);
   }
 
+  const isNewRef = useRef(isNew);
+  const selectedIdRef = useRef(selectedId);
+  useEffect(() => { isNewRef.current = isNew; }, [isNew]);
+  useEffect(() => { selectedIdRef.current = selectedId; }, [selectedId]);
+
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
@@ -58,11 +64,14 @@ export default function App() {
       setListings(ls);
       setCostSummary(cs);
 
-      if (!isNew && selectedId) {
-        const still = ls.find((l) => l.id === selectedId);
+      const currentIsNew = isNewRef.current;
+      const currentSelectedId = selectedIdRef.current;
+
+      if (!currentIsNew && currentSelectedId) {
+        const still = ls.find((l) => l.id === currentSelectedId);
         if (still) setForm(listingToForm(still));
         else { setSelectedId(null); setForm(DEFAULT_FORM); }
-      } else if (!isNew && !selectedId && ls.length > 0) {
+      } else if (!currentIsNew && !currentSelectedId && ls.length > 0) {
         const first = ls[0];
         setSelectedId(first.id);
         setForm(listingToForm(first));
@@ -72,7 +81,7 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [isNew, selectedId]);
+  }, []);
 
   useEffect(() => { loadAll(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -136,7 +145,8 @@ export default function App() {
 
   async function handleDelete() {
     if (!selectedId) return;
-    if (!confirm("Delete this listing? This cannot be undone.")) return;
+    if (!confirmDelete) { setConfirmDelete(true); return; }
+    setConfirmDelete(false);
     try {
       await api.listings.delete(selectedId);
       setListings((prev) => prev.filter((l) => l.id !== selectedId));
@@ -218,9 +228,11 @@ export default function App() {
             isNew={isNew}
             form={form}
             saving={saving}
+            confirmDelete={confirmDelete}
             onChange={handleChange}
             onSave={handleSave}
             onDelete={handleDelete}
+            onCancelDelete={() => setConfirmDelete(false)}
           />
           <SuggestionPanel
             suggestion={selectedListing?.latestSuggestion ?? null}

@@ -4,18 +4,15 @@ module Agent
     MODEL_NAME = "deterministic-merchandising-rules"
 
     def generate(step_name:, prompt:, snapshot:, analysis:, prior_responses: {})
-      response = if step_name == "final_synthesis"
-        draft(snapshot, analysis).to_json
-      else
-        findings(step_name, snapshot, analysis)
-      end
+      computed_draft = step_name == "final_synthesis" ? draft(snapshot, analysis) : nil
+      response = computed_draft ? computed_draft.to_json : findings(step_name, snapshot, analysis)
 
       input_tokens  = estimate_tokens(prompt)
       output_tokens = estimate_tokens(response)
 
       {
         response: response,
-        draft: step_name == "final_synthesis" ? draft(snapshot, analysis) : nil,
+        draft: computed_draft,
         provider: PROVIDER_NAME,
         model: MODEL_NAME,
         input_tokens: input_tokens,
