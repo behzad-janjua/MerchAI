@@ -4,27 +4,21 @@
   "private": true,
   "packageManager": "yarn@1.22.22",
   "workspaces": [
-    "backend"
+    "backend",
+    "frontend"
   ],
   "scripts": {
-    "setup": "yarn bundle:install && yarn install --frozen-lockfile && yarn prisma:migrate && yarn prisma:generate && yarn seed",
+    "setup": "yarn bundle:install && yarn install --frozen-lockfile && yarn db:migrate && yarn db:seed",
     "bundle:install": "scripts/with-ruby.sh bundle config set path vendor/bundle && scripts/with-ruby.sh bundle install",
-    "seed": "yarn prisma:seed",
-    "seen": "yarn seed",
-    "dev": "node scripts/run-services.mjs dev:backend dev:rails",
-    "start": "yarn build && node scripts/run-services.mjs start:backend start:rails",
-    "build": "yarn build:backend",
-    "dev:backend": "yarn workspace @merchai/backend dev",
-    "dev:rails": "scripts/with-ruby.sh bundle exec rails server -p 5173",
-    "start:backend": "yarn workspace @merchai/backend start",
-    "start:rails": "scripts/with-ruby.sh bundle exec rails server -p 5173",
-    "build:backend": "yarn workspace @merchai/backend build",
-    "test:backend": "yarn workspace @merchai/backend test",
-    "test:rails": "scripts/with-ruby.sh bundle exec rails test",
-    "prisma:generate": "yarn workspace @merchai/backend prisma:generate",
-    "prisma:migrate": "yarn workspace @merchai/backend prisma:migrate",
-    "prisma:seed": "yarn workspace @merchai/backend prisma:seed",
-    "prisma:studio": "yarn workspace @merchai/backend prisma:studio"
+    "dev": "node scripts/run-services.mjs dev:rails dev:frontend",
+    "dev:rails": "scripts/with-ruby.sh bundle exec rails server -p 4000",
+    "dev:frontend": "yarn workspace @merchai/frontend dev",
+    "build": "yarn workspace @merchai/frontend build",
+    "test:rails": "scripts/with-ruby.sh bundle exec rspec",
+    "db:migrate": "scripts/with-ruby.sh bundle exec rails db:migrate",
+    "db:seed": "scripts/with-ruby.sh bundle exec rails db:seed",
+    "db:create": "scripts/with-ruby.sh bundle exec rails db:create",
+    "db:setup": "scripts/with-ruby.sh bundle exec rails db:create db:migrate db:seed"
   },
   "engines": {
     "node": ">=20"
