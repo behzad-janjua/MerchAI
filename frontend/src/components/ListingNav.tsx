@@ -43,28 +43,33 @@ export function ListingNav({ listings, selectedId, costSummary, onSelect, onImpo
       </div>
 
       <div className="import-strip">
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".csv,text/csv"
-          onChange={handleFileChange}
-        />
-        <button className="btn btn-outline" style={{ fontSize: 12, height: 28, padding: "0 10px" }} onClick={() => fileRef.current?.click()}>
+        <label className="import-trigger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
           Import CSV
-        </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleFileChange}
+          />
+        </label>
       </div>
 
       <div className="listing-nav">
         {listings.length === 0 ? (
-          <div className="empty" style={{ paddingTop: 40 }}>
+          <div className="empty">
             <div className="empty-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z" />
-                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M3 9h18M9 21V9" />
               </svg>
             </div>
             <strong>No listings yet</strong>
-            <span>Import a CSV or create your first listing</span>
+            <span>Import a CSV or create your first listing above</span>
           </div>
         ) : (
           listings.map((listing) => {
@@ -75,13 +80,16 @@ export function ListingNav({ listings, selectedId, costSummary, onSelect, onImpo
                 key={listing.id}
                 className={`listing-item${selected ? " selected" : ""}`}
                 onClick={() => onSelect(listing.id)}
+                aria-pressed={selected}
               >
                 <span className="listing-glyph">{listing.title[0]?.toUpperCase() ?? "?"}</span>
                 <span className="listing-meta">
                   <strong>{listing.title}</strong>
                   <small>{listing.productType ?? listing.vendor ?? "Uncategorized"}</small>
                 </span>
-                <span className={`score-pill ${scoreClass(score)}`}>{score ?? "–"}</span>
+                {score != null && (
+                  <span className={`score-pill ${scoreClass(score)}`}>{score}</span>
+                )}
               </button>
             );
           })
@@ -102,11 +110,9 @@ export function ListingNav({ listings, selectedId, costSummary, onSelect, onImpo
                 <small>Agent steps</small>
               </div>
             </div>
-            <div className="provider-list">
-              {costSummary.byProviderModel.length === 0 ? (
-                <p className="muted">No runs yet.</p>
-              ) : (
-                costSummary.byProviderModel.map((row) => (
+            {costSummary.byProviderModel.length > 0 && (
+              <div className="provider-list">
+                {costSummary.byProviderModel.map((row) => (
                   <div className="provider-row" key={`${row.provider}:${row.model}`}>
                     <div className="provider-row-info">
                       <b>{row.provider}</b>
@@ -114,9 +120,9 @@ export function ListingNav({ listings, selectedId, costSummary, onSelect, onImpo
                     </div>
                     <span className="provider-row-cost">{money(row.estimatedCost)}</span>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </>
         ) : (
           <p className="muted">Run the optimizer to track costs.</p>

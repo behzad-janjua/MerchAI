@@ -58,7 +58,7 @@ export function ListingEditor({ listing, isNew, form, saving, confirmDelete, onC
     : (form.title.trim() || "Untitled listing");
 
   const subtitle = isNew
-    ? "Fill in the details below and save to create a listing"
+    ? "Fill in the details below, then save to create a listing"
     : [form.vendor, form.productType].filter(Boolean).join(" · ") || "Edit product details below";
 
   return (
@@ -69,7 +69,7 @@ export function ListingEditor({ listing, isNew, form, saving, confirmDelete, onC
             <h1 className="editor-title">{title}</h1>
             <p className="editor-subtitle">{subtitle}</p>
           </div>
-          <span className="editor-badge">{isNew ? "New" : "Editing"}</span>
+          <span className={`editor-badge${isNew ? " badge-new" : ""}`}>{isNew ? "New" : "Editing"}</span>
         </div>
 
         <div className="form-section">
@@ -128,7 +128,11 @@ export function ListingEditor({ listing, isNew, form, saving, confirmDelete, onC
 
         <div className="form-actions">
           {!isNew && listing && !confirmDelete && (
-            <button className="btn btn-ghost" style={{ color: "var(--error-text)", marginRight: "auto" }} onClick={onDelete}>
+            <button
+              className="btn btn-ghost"
+              style={{ color: "var(--error-text)", marginRight: "auto" }}
+              onClick={onDelete}
+            >
               Delete listing
             </button>
           )}
