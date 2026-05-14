@@ -44,6 +44,17 @@ export default function App() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">(() =>
+    (localStorage.getItem("merch-theme") as "light" | "dark") ?? "light"
+  );
+
+  function toggleTheme() {
+    setTheme((t) => {
+      const next = t === "light" ? "dark" : "light";
+      localStorage.setItem("merch-theme", next);
+      return next;
+    });
+  }
 
   const selectedListing = listings.find((l) => l.id === selectedId) ?? null;
 
@@ -192,15 +203,17 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app" data-theme={theme}>
       <Header
         selectedListing={selectedListing}
         isNew={isNew}
         optimizing={optimizing}
+        theme={theme}
         onNew={startNew}
         onSave={handleSave}
         onOptimize={handleOptimize}
         onRefresh={loadAll}
+        onToggleTheme={toggleTheme}
       />
 
       <div className="notice-wrap">

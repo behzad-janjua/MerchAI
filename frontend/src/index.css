@@ -283,11 +283,11 @@ button { cursor: pointer; }
   padding: 0 6px 8px;
   display: flex; flex-direction: column; gap: 2px;
   scrollbar-width: thin;
-  scrollbar-color: var(--surface3) transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 .listing-nav::-webkit-scrollbar { width: 3px; }
 .listing-nav::-webkit-scrollbar-track { background: transparent; }
-.listing-nav::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 99px; }
+.listing-nav::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
 
 .listing-item {
   display: flex; align-items: center; gap: 10px;
@@ -413,11 +413,11 @@ button { cursor: pointer; }
   background: var(--bg);
   padding: 28px 24px;
   scrollbar-width: thin;
-  scrollbar-color: var(--surface3) transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 .col-center::-webkit-scrollbar { width: 3px; }
 .col-center::-webkit-scrollbar-track { background: transparent; }
-.col-center::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 99px; }
+.col-center::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
 
 .editor-wrap {
   background: var(--surface);
@@ -534,11 +534,11 @@ button { cursor: pointer; }
   background: var(--surface);
   overflow-y: auto; display: flex; flex-direction: column;
   scrollbar-width: thin;
-  scrollbar-color: var(--surface3) transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 .col-right::-webkit-scrollbar { width: 3px; }
 .col-right::-webkit-scrollbar-track { background: transparent; }
-.col-right::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 99px; }
+.col-right::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
 
 .suggestion-header {
   position: sticky; top: 0; z-index: 2;
@@ -728,4 +728,125 @@ button { cursor: pointer; }
 
 @media (prefers-reduced-motion: reduce) {
   .spinner { animation-duration: 1500ms; }
+}
+
+/* ─── Theme transition ───────────────────────────────────────── */
+
+.app-header, .col-left, .col-center, .col-right,
+.editor-wrap, .listing-item, .listing-glyph,
+.metric-card, .suggestion-section, .step-item,
+.form-actions, .suggestion-header, .cost-section {
+  transition-property: background-color, border-color, color;
+  transition-duration: 220ms;
+  transition-timing-function: ease;
+}
+
+/* ─── Dark theme ─────────────────────────────────────────────── */
+
+[data-theme="dark"] {
+  /* Orange — brighter on dark backgrounds */
+  --amber:        #fb923c;
+  --amber-light:  #fdba74;
+  --amber-dim:    #f97316;
+  --amber-solid:  #f97316;
+  --amber-glow:   rgba(251, 146, 60, 0.12);
+  --amber-border: rgba(251, 146, 60, 0.28);
+  --amber-text:   #fdba74;
+  --amber-label:  rgba(251, 200, 140, 0.55);
+
+  /* Dark surfaces — slate-based */
+  --bg:       #0f172a;
+  --surface:  #1e293b;
+  --surface2: #162032;
+  --surface3: #334155;
+
+  /* Borders on dark */
+  --border:        rgba(255, 255, 255, 0.04);
+  --border-mid:    rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+
+  /* Text on dark */
+  --text:   #e2e8f0;
+  --text-2: #94a3b8;
+  --text-3: #475569;
+
+  /* Status on dark */
+  --green:    #4ade80;
+  --green-bg: rgba(74, 222, 128, 0.10);
+  --red:      #f87171;
+  --red-bg:   rgba(248, 113, 113, 0.10);
+
+  /* Deeper shadows */
+  --sh-xs:    0 1px 3px rgba(0, 0, 0, 0.30);
+  --sh-sm:    0 2px 8px rgba(0, 0, 0, 0.40), 0 1px 3px rgba(0, 0, 0, 0.25);
+  --sh-md:    0 8px 28px rgba(0, 0, 0, 0.50), 0 2px 8px rgba(0, 0, 0, 0.30);
+  --sh-focus: 0 0 0 3px rgba(251, 146, 60, 0.28);
+}
+
+/* Dark — form inputs */
+[data-theme="dark"] .form-grid input,
+[data-theme="dark"] .form-grid textarea,
+[data-theme="dark"] .form-grid select {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--border-mid);
+}
+
+[data-theme="dark"] .form-grid input::placeholder,
+[data-theme="dark"] .form-grid textarea::placeholder { color: var(--text-3); }
+
+[data-theme="dark"] .form-grid input:hover,
+[data-theme="dark"] .form-grid textarea:hover,
+[data-theme="dark"] .form-grid select:hover { border-color: var(--border-strong); }
+
+[data-theme="dark"] .form-grid input:focus,
+[data-theme="dark"] .form-grid textarea:focus,
+[data-theme="dark"] .form-grid select:focus {
+  border-color: var(--amber);
+  box-shadow: var(--sh-focus);
+}
+
+[data-theme="dark"] .form-grid select {
+  color-scheme: dark;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+
+/* Dark — step items */
+[data-theme="dark"] .step-item {
+  background: var(--surface);
+  border-color: var(--border-mid);
+}
+
+[data-theme="dark"] .step-body { background: var(--surface2); }
+
+/* Dark — score pills adjusted for dark sidebar */
+[data-theme="dark"] .score-pill { background: var(--surface3); }
+
+/* Dark — btn-icon in header stays readable */
+[data-theme="dark"] .btn-ghost {
+  color: var(--text-2);
+}
+[data-theme="dark"] .btn-ghost:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+}
+
+[data-theme="dark"] .btn-outline {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+[data-theme="dark"] .btn-outline:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+/* Dark — score ring track */
+[data-theme="dark"] .score-ring-track { color: var(--border-strong); }
+
+/* Dark — theme toggle icon overflow container */
+[data-theme="dark"] .btn-icon,
+[data-theme="light"] .btn-icon {
+  overflow: hidden;
+  position: relative;
 }
