@@ -1,6 +1,13 @@
 module Agent
   class ProductOptimizationPipeline
-    PIPELINE_STEPS = STEP_NAMES.freeze
+    PIPELINE_STEPS = %w[
+      listing_snapshot
+      seo_analysis
+      copy_analysis
+      tag_analysis
+      audience_positioning_analysis
+      final_synthesis
+    ].freeze
 
     def initialize(
       snapshot_tool: ProductSnapshotTool.new,

@@ -31,6 +31,13 @@ module Api
       end
 
       def optimize
+        if AgentRun.where(product_listing: @listing, status: "running").exists?
+          return render json: {
+            error: "optimization_in_progress",
+            message: "An optimization is already running for this listing."
+          }, status: :conflict
+        end
+
         run = Agent::ProductOptimizationPipeline.new.run(@listing)
 
         if run.status == "failed"
@@ -40,7 +47,7 @@ module Api
           }, status: :unprocessable_entity
         end
 
-        render json: run.as_api_json, status: :created
+        render json: run.as_api_json
       rescue => e
         render json: { error: "optimization_failed", message: e.message }, status: :unprocessable_entity
       end
@@ -104,14 +111,7 @@ module Api
       end
 
       def listing_update_params
-        permitted = params.permit(
-          listing: [
-            :shopify_product_id, :title, :handle, :vendor, :product_type,
-            :description, :price, :currency, :inventory_quantity,
-            { tags: [], raw_data: {} }
-          ]
-        )
-        permitted[:listing] || params.permit(
+        params.require(:listing).permit(
           :shopify_product_id, :title, :handle, :vendor, :product_type,
           :description, :price, :currency, :inventory_quantity,
           tags: [], raw_data: {}

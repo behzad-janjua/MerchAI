@@ -44,7 +44,7 @@ module Agent
           "#{title} should be positioned around the primary buyer benefit first, then supported with product details. #{first_opp}",
         seo_notes:
           "Lead with the product category, include use-case keywords naturally, and keep the title readable for shoppers.",
-        score: [[analysis[:score].to_i + 12, 100].min, 0].max,
+        score: [[analysis[:score].to_i, 100].min, 0].max,
         rationale:
           "Generated from structured listing gaps and merchandising rules because no external LLM response was available."
       }
@@ -99,7 +99,7 @@ module Agent
     end
 
     def build_tags(snapshot, product_type)
-      raw = snapshot.tags + [product_type, snapshot.vendor, "gift", "everyday", "quality", "bestseller"]
+      raw = snapshot.tags + [product_type, snapshot.vendor]
       raw.compact.map { |t| slugify(t.to_s) }.uniq.first(12)
     end
 
